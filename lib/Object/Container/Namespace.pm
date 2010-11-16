@@ -24,17 +24,25 @@ sub import {
         my $registered_class = {};
         {
             no strict 'refs';
-            *{"$caller\::_instance_table"} = sub { $instance_table };
+            *{"$caller\::_instance_table"}     = sub { $instance_table };
             *{"$caller\::_registered_classes"} = sub { $registered_class };
+            *{"$caller\::register"}            = sub { register($caller,@_) };
         }
-
+        $caller->initialize(@_);
     }
     else {
         # export methods
+        my @export_names = @_;
+
+        {
+            no strict 'refs';
+            *{"$caller\::container"} = sub {
+                my $pkg = shift;
+                return $pkg ? $class->get($pkg) : $class;
+            };
+        }
 
     }
-
-    $caller->initialize(@_);
 }
 
 sub initialize { 'DUMMY' }
