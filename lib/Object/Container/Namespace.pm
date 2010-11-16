@@ -76,7 +76,7 @@ sub get {
     my $obj = $class->_instance_table->{$pkg};
 
     unless ( $obj ) {
-        my $code = $class->_registered_class->{$pkg};
+        my $code = $class->_registered_classes->{$pkg};
         unless ( $code ) {
             Carp::croak("$pkg is not registered!");
         }
