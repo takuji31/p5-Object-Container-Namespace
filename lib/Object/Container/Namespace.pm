@@ -12,25 +12,27 @@ sub import {
     my $class  = shift;
     my $caller = caller;
 
-    if( $_[0] && $_[0] eq '-base' ) {
+    if ( $_[0] && $_[0] eq '-base' ) {
+
         # base
 
         {
             no strict 'refs';
-            push @{"$caller\::ISA"},$class;
+            push @{"$caller\::ISA"}, $class;
         }
 
-        my $instance_table = {};
+        my $instance_table   = {};
         my $registered_class = {};
         {
             no strict 'refs';
-            *{"$caller\::_instance_table"}     = sub { $instance_table };
-            *{"$caller\::_registered_classes"} = sub { $registered_class };
-            *{"$caller\::register"}            = sub { register($caller,@_) };
+            *{"$caller\::_instance_table"}     = sub {$instance_table};
+            *{"$caller\::_registered_classes"} = sub {$registered_class};
+            *{"$caller\::register"}            = sub { register( $caller, @_ ) };
         }
         $caller->initialize(@_);
     }
     else {
+
         # export methods
         my @export_names = @_;
 
@@ -42,10 +44,14 @@ sub import {
             };
         }
 
+        for my $export_name ( @export_names ) {
+            $class->register_namespace( $export_name );
+        }
+
     }
 }
 
-sub initialize { 'DUMMY' }
+sub initialize {'DUMMY'}
 
 sub register {
     my $class       = shift;
@@ -53,15 +59,18 @@ sub register {
     my $initializer = $_[0];
     my @options     = @_;
 
-    unless ( $pkg ) {
+    unless ($pkg) {
         Carp::croak("Register name is empty!");
     }
-    unless ( defined $initializer && ref($initializer) eq 'CODE' && scalar @options == 1 ){
+    unless ( defined $initializer
+        && ref($initializer) eq 'CODE'
+        && scalar @options == 1 )
+    {
         $initializer = sub {
             my $self = shift;
             $self->load_class($pkg);
             $pkg->new(@options);
-        }
+        };
     }
 
     #register classes
@@ -75,15 +84,45 @@ sub get {
 
     my $obj = $class->_instance_table->{$pkg};
 
-    unless ( $obj ) {
+    unless ($obj) {
         my $code = $class->_registered_classes->{$pkg};
-        unless ( $code ) {
+        unless ($code) {
             Carp::croak("$pkg is not registered!");
         }
         $obj = $code->($self);
     }
 
     return $obj;
+}
+
+sub register_namespace {
+    my ( $class, $namespace ) = @_;
+
+    unless ($namespace) {
+        return;
+    }
+
+    my $self = ref($class) ? $class : $class->instance;
+    ( my $basename = ref($class) ? ref($class) : $class )
+        =~ s/::[a-zA-Z0-9]+$//;
+
+    {
+        no strict 'refs';
+        *{"$class\::$namespace"} = sub {
+            my $pkg = shift;
+            my $class_name;
+            if( $pkg ) {
+                $class_name = join '::', $basename, camelize($namespace), camelize($pkg);
+                #initial access
+                if( $class->_registered_classes->{$class_name} ) {
+                    register($class,$class_name);
+                }
+            }
+
+            return $pkg ? $class->get($class_name) : $class;
+        };
+    }
+
 }
 
 1;
