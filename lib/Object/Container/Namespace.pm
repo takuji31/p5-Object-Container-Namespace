@@ -91,9 +91,10 @@ sub get {
             Carp::croak("$pkg is not registered!");
         }
         $obj = $code->($self);
+        $class->_instance_table->{$pkg} = $obj;
     }
-
     return $obj;
+
 }
 
 sub register_namespace {
