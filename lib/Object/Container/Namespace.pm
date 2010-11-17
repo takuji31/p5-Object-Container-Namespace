@@ -46,7 +46,7 @@ sub import {
         }
 
         for my $export_name ( @export_names ) {
-            $class->register_namespace( $export_name );
+            $class->register_namespace( $caller, $export_name );
         }
 
     }
@@ -97,7 +97,7 @@ sub get {
 }
 
 sub register_namespace {
-    my ( $class, $namespace ) = @_;
+    my ( $class, $caller, $namespace ) = @_;
 
     unless ($namespace) {
         return;
@@ -109,13 +109,13 @@ sub register_namespace {
 
     {
         no strict 'refs';
-        *{"$class\::$namespace"} = sub {
+        *{"$caller\::$namespace"} = sub {
             my $pkg = shift;
             my $class_name;
             if( $pkg ) {
                 $class_name = join '::', $basename, camelize($namespace), camelize($pkg);
                 #initial access
-                if( $class->_registered_classes->{$class_name} ) {
+                unless ( $class->_registered_classes->{$class_name} ) {
                     register($class,$class_name);
                 }
             }
