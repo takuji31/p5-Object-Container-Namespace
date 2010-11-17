@@ -28,7 +28,7 @@ sub import {
             no strict 'refs';
             *{"$caller\::_instance_table"}     = sub {$instance_table};
             *{"$caller\::_registered_classes"} = sub {$registered_class};
-            *{"$caller\::register"}            = sub { register( $caller, @_ ) };
+            *{"$caller\::register"}            = sub { _register( $caller, @_ ) };
         }
         $caller->initialize(@_);
     }
@@ -54,7 +54,7 @@ sub import {
 
 sub initialize {'DUMMY'}
 
-sub register {
+sub _register {
     my $class       = shift;
     my $pkg         = shift;
     my $initializer = $_[0];
