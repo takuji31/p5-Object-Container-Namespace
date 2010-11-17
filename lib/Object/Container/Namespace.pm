@@ -136,21 +136,57 @@ __END__
 
 =head1 NAME
 
-Object::Container::Namespace -
+Object::Container::Namespace - Container with name space register
 
 =head1 SYNOPSIS
 
-  use Object::Container::Namespace;
+    package  MyApp::Container;
+    use strict;
+    use warnings;
+    use Object::Container::Namespace -base;
+    register 'db' => sub {
+        my $self = shift;
+        MyApp::DB->new;
+    };
+
+    package  Hoge::Api::Wassr;
+    use strict;
+    use warnings;
+
+    sub new {
+        bless {},shift;
+    }
+
+    sub login { 'do something' }
+
+    package  Hoge::Pages::Fuga;
+    use strict;
+    use warnings;
+    use MyApp::Container qw/api/;
+
+    sub dispatch_index {
+        my $self = shift;
+
+        #get registered object
+        container('db')->search();
+
+        #get registered object by namespace register
+        api('wassr')->login('wasao');
+        #call Hoge::Api::Twitter->login
+        api('twitter')->login('tweet');
+    }
 
 =head1 DESCRIPTION
 
-Object::Container::Namespace is
+Object::Container::Namespace is Container with name space register
 
 =head1 AUTHOR
 
 Nishibayashi Takuji E<lt>takuji {at} senchan.jpE<gt>
 
 =head1 SEE ALSO
+
+Object::Container Kamui::Container
 
 =head1 LICENSE
 
