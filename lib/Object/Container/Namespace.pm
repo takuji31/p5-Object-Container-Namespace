@@ -4,6 +4,7 @@ use warnings;
 
 use String::CamelCase qw/camelize/;
 use Carp();
+use UNIVERSAL::require;
 use base qw/Class::Singleton/;
 
 our $VERSION = '0.01';
@@ -123,6 +124,11 @@ sub register_namespace {
         };
     }
 
+}
+
+sub load_class {
+    my ( $class, $pkg ) = @_;
+    $pkg->require or die $@;
 }
 
 1;
