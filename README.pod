@@ -1,6 +1,6 @@
 =head1 NAME
 
-Object::Container::Namespace - Container with namespace register
+Object::Container::Namespace - Container with name space register
 
 =head1 SYNOPSIS
 
@@ -42,7 +42,7 @@ Object::Container::Namespace - Container with namespace register
 
 =head1 DESCRIPTION
 
-Object::Container::Namespace is Conitainer with namespace register
+Object::Container::Namespace is Container with name space register
 
 =head1 AUTHOR
 
