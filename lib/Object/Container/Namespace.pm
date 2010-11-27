@@ -108,21 +108,22 @@ sub register_namespace {
     ( my $basename = ref($class) ? ref($class) : $class )
         =~ s/::[a-zA-Z0-9]+$//;
 
+    my $code = sub {
+        my $pkg = shift;
+        my $class_name;
+        if( $pkg ) {
+            $class_name = join '::', $basename, camelize($namespace), camelize($pkg);
+            #initial access
+            unless ( $class->_registered_classes->{$class_name} ) {
+                _register($class,$class_name);
+            }
+        }
+
+        return $pkg ? $class->get($class_name) : $class;
+    };
     {
         no strict 'refs';
-        *{"$caller\::$namespace"} = sub {
-            my $pkg = shift;
-            my $class_name;
-            if( $pkg ) {
-                $class_name = join '::', $basename, camelize($namespace), camelize($pkg);
-                #initial access
-                unless ( $class->_registered_classes->{$class_name} ) {
-                    register($class,$class_name);
-                }
-            }
-
-            return $pkg ? $class->get($class_name) : $class;
-        };
+        *{"$caller\::$namespace"} = $code;
     }
 
 }
